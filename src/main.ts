@@ -4,19 +4,22 @@ import { AppModule } from './app.module';
 import * as session from 'express-session';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
+
   app.use(
     session({
-      secret: '8gfSM7kyUO4UVOIUc5Qj',
+      secret: process.env.SESSION_SECRET || 'defaultSecret',
       resave: false,
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
         secure: false,
-        // maxAge: 60000
-        maxAge: 86400000, // 1 hari
+        maxAge: 86400000, // 1 day
       },
     }),
   );
@@ -37,8 +40,7 @@ async function bootstrap() {
     },
     {
       name: 'Freelance',
-      description:
-        'API for Freelance, including translation and non-translation features',
+      description: 'API for Freelance, including translation and non-translation features',
     },
     {
       name: 'Vendor',
@@ -49,10 +51,11 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   });
 
-  const port: number = Number(process.env.PORT);
+  const port: number = Number(process.env.PORT) || 3000;
   await app.listen(port, '0.0.0.0');
 }
+
 bootstrap();
